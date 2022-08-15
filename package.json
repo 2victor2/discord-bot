@@ -9,6 +9,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@discordjs/rest": "^1.0.1",
     "discord.js": "^14.2.0",
     "dotenv": "^16.0.1"
   },
@@ -17,6 +18,7 @@
     "sucrase": "^3.25.0"
   },
   "scripts": {
-    "dev": "nodemon ."
+    "dev": "nodemon .",
+    "commands": "node deploy-commands.js" 
   }
 }
