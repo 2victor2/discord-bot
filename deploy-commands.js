@@ -1,29 +1,27 @@
 import config from "./config.json" assert { type: "json" };
-import { SlashCommandBuilder, Routes } from "discord.js";
 import { REST } from "@discordjs/rest";
+import { Routes } from "discord.js";
+import { fileURLToPath } from "url";
+import path from "path";
+import fs from "fs";
 
-const commands = [
-  new SlashCommandBuilder()
-    .setName("ping")
-    .setDescription("Replies with pong!"),
-  new SlashCommandBuilder()
-    .setName("user")
-    .setDescription("Replies with user info!"),
-  new SlashCommandBuilder()
-    .setName("server")
-    .setDescription("Replies with server info!"),
-  new SlashCommandBuilder()
-    .setName("echo")
-    .setDescription("Replies with your input!")
-    .addStringOption((option) =>
-      option
-        .setName("input")
-        .setDescription("The input to echo back")
-        .setRequired(true)
-    ),
-].map((command) => command.toJSON());
+const __filename = fileURLToPath(import.meta.url);
 
-console.log(commands);
+const __dirname = path.dirname(__filename);
+
+const commands = [];
+
+const commandsPath = path.join(__dirname, "commands");
+
+const commandsFiles = fs
+  .readdirSync(commandsPath)
+  .filter((file) => file.endsWith(".js"));
+
+for (const file of commandsFiles) {
+  const filePath = path.join(commandsPath, file);
+  const command = await import(filePath);
+  commands.push(command.default.data.toJSON());
+}
 
 const rest = new REST({ version: 10 }).setToken(config.token);
 
