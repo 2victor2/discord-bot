@@ -1,15 +1,15 @@
 export default {
   name: "interactionCreate",
-  async execute(interaction) {
+  async execute(commands, interaction) {
     if (!interaction.isChatInputCommand())
       return "Not a chat input command! Try again fool :D";
 
-    const command = client.commands.get(interaction.commandName);
+    const command = commands.get(interaction.commandName);
 
     if (!command) return "Command not found! Did I forget to steal from you?";
 
     try {
-      await command.execute(interaction);
+      await command.default.execute(interaction);
     } catch (err) {
       console.error(err);
       await interaction.reply({
