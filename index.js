@@ -10,6 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
+// commands handling
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, "commands");
 const commandsFiles = fs
@@ -24,28 +25,20 @@ for (const file of commandsFiles) {
   client.commands.set(command.default.data.name, command);
 }
 
-client.once("ready", () => {
-  console.log("Ready!");
-});
+// events handling
+const eventsPath = path.join(__dirname, "events");
+const eventsFiles = fs
+  .readdirSync(eventsPath)
+  .filter((file) => file.endsWith(".js"));
 
-client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isChatInputCommand())
-    return "Not a chat input command! Try again fool :D";
-
-  const command = client.commands.get(interaction.commandName);
-
-  if (!command) return "Command not found! Did I forget to steal from you?";
-
-  try {
-    await command.execute(interaction);
-  } catch (err) {
-    console.error(err);
-    await interaction.reply({
-      content:
-        "There was an error while executing this command!\nNot joking! Run for your life!!!\nHAhaHAHAha, you should have seen your face!!\nJust relax while my people solve this, what about another command?",
-      ephemeral: true,
-    });
+for (const file of eventsFiles) {
+  const filePath = path.join(commandsPath, file);
+  const event = await import(filePath);
+  if (event.once) {
+    client.once(event.name, (...args) => event.execute(...args));
+  } else {
+    client.on(event.name, (...args) => event.execute(...args));
   }
-});
+}
 
 client.login(config.token);
